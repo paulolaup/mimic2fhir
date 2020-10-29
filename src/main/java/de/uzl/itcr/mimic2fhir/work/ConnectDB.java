@@ -89,7 +89,11 @@ public class ConnectDB {
 	 * @return number of patients
 	 */
 	public int getNumberOfPatients() {
-		String query = "SELECT COUNT(*) FROM PATIENTS";
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the PATIENTS table is in the CORE module
+		 */
+		String query = "SELECT COUNT(*) FROM CORE.PATIENTS";
 		int count = 0;
 		PreparedStatement statement;
 		try {
@@ -110,7 +114,11 @@ public class ConnectDB {
 	 * @return filled MPatient-Object
 	 */
 	public MPatient getFirstPatient() {
-		String query = "SELECT * FROM PATIENTS ORDER BY ROW_ID LIMIT 1";
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the PATIENTS table is in the CORE module
+		 */
+		String query = "SELECT * FROM CORE.PATIENTS ORDER BY ROW_ID LIMIT 1";
 		return getOnePatientFromDb(query);
 	}
 
@@ -120,7 +128,11 @@ public class ConnectDB {
 	 * @return filled MPatient-Object
 	 */
 	public MPatient getPatientByRowId(int rowId) {
-		String query = "SELECT * FROM PATIENTS WHERE ROW_ID = " + rowId;
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the PATIENTS table is in the CORE module
+		 */
+		String query = "SELECT * FROM CORE.PATIENTS WHERE ROW_ID = " + rowId;
 		return getOnePatientFromDb(query);
 	}
 	
@@ -141,10 +153,10 @@ public class ConnectDB {
 					mPat.setGender(rs.getString(3));
 					//DOD
 					mPat.setDeathDate(rs.getDate(5));
-										
+
 					//Admissions
 					getPatientAdmissions(mPat);
-					
+
 					return mPat;
 			 }
 		} catch (SQLException e) {
@@ -155,7 +167,11 @@ public class ConnectDB {
 	}
 	
 	private void getPatientAdmissions(MPatient pat) {
-		String query = "SELECT * FROM ADMISSIONS WHERE SUBJECT_ID = " + pat.getPatientSubjectId();
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the ADMISSIONS table is in the CORE module
+		 */
+		String query = "SELECT * FROM CORE.ADMISSIONS WHERE SUBJECT_ID = " + pat.getPatientSubjectId();
 		PreparedStatement statement;
 		try {
 			statement = connection.prepareStatement(query);
@@ -191,12 +207,16 @@ public class ConnectDB {
 					
 					//Labevents
 					getLabEvents(mAdm, pat.getPatientSubjectId());
-					
+
+					/*
+					 *Due to this method being disabled this part has to be disabled as well until MIMIC IV receives
+					 *sufficient updates
 					//Noteevents
 					getNoteEvents(mAdm, pat.getPatientSubjectId());
-										
+					*/
+
 					//Prescriptions
-					getPrecriptions(mAdm, pat.getPatientSubjectId());
+					getPrescriptions(mAdm, pat.getPatientSubjectId());
 										
 					//Transfers
 					getTransfers(mAdm, pat.getPatientSubjectId());
@@ -210,8 +230,12 @@ public class ConnectDB {
 	}
 	
 	private void getChartEvents(MAdmission admission, String patientSubjId) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the CHARTEVENTS table is in the ICU module
+		 */
 		String query =  "SELECT C.SUBJECT_ID, C.HADM_ID, C.CHARTTIME, C.CGID, C.VALUE, C.VALUENUM, C.VALUEUOM, D.LABEL " +
-						"FROM CHARTEVENTS C " +
+						"FROM MIMIC_ICU.CHARTEVENTS C " +
 					    "INNER JOIN D_ITEMS D ON C.ITEMID = D.ITEMID " + 
 						"WHERE C.HADM_ID= " + admission.getAdmissionId();
 		
@@ -258,8 +282,12 @@ public class ConnectDB {
 	}
 	
 	private void getLabEvents(MAdmission admission, String patientSubjId) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the LABEVENTS table is in the HOSP module
+		 */
 		String query =  "SELECT L.SUBJECT_ID, L.HADM_ID, L.CHARTTIME, L.VALUE, L.VALUENUM, L.VALUEUOM, L.FLAG, D.LABEL, D.FLUID, D.LOINC_CODE " +
-						"FROM LABEVENTS L " +
+						"FROM MIMIC_HOSP.LABEVENTS L " +
 					    "INNER JOIN D_LABITEMS D ON L.ITEMID = D.ITEMID " + 
 						"WHERE L.SUBJECT_ID = " + patientSubjId + " AND L.HADM_ID= " + admission.getAdmissionId();
 		PreparedStatement statement;
@@ -313,7 +341,11 @@ public class ConnectDB {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * This method is disabled due to its corresponding table not currently being available in the database
+	 */
+	/*
 	private void getNoteEvents(MAdmission admission, String patientSubjId) {
 		String query =  "SELECT * " +
 						"FROM NOTEEVENTS " +
@@ -355,11 +387,16 @@ public class ConnectDB {
 			e.printStackTrace();
 		}
 	}
+	 */
 	
 	private void getDiagnoses(String patId, MAdmission adm) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the diagnosis_icd and d_icd_diagnosis tables are in the hosp module
+		 */
 		String query = "SELECT *" + 
-					"	FROM diagnoses_icd d" + 
-					"   INNER JOIN d_icd_diagnoses i ON d.icd9_code = i.icd9_code" + 
+					"	FROM hosp.diagnoses_icd d" +
+					"   INNER JOIN hosp.d_icd_diagnoses i ON d.icd9_code = i.icd9_code" +
 					"   WHERE d.subject_id = " + patId + "AND d.hadm_id = " + adm.getAdmissionId() + 
 					"   ORDER BY d.seq_num";
 		PreparedStatement statement;
@@ -382,9 +419,13 @@ public class ConnectDB {
 	}
 	
 	private void getProcedures(String patId, MAdmission adm) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the procedures_icd and d_icd_procedures tables are in the hosp module
+		 */
 		String query = "SELECT *" + 
-					"	FROM procedures_icd p" + 
-					"   INNER JOIN d_icd_procedures i ON p.icd9_code = i.icd9_code" + 
+					"	FROM hosp.procedures_icd p" +
+					"   INNER JOIN hosp.d_icd_procedures i ON p.icd9_code = i.icd9_code" +
 					"   WHERE p.subject_id = " + patId + "AND p.hadm_id = " + adm.getAdmissionId() + 
 					"   ORDER BY p.seq_num";
 		PreparedStatement statement;
@@ -405,11 +446,15 @@ public class ConnectDB {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * This method is disabled due to its corresponding table not currently being available in the database
+	 */
 	/**
 	 * Get dictionary with all caregivers - Key: Id, Value: Caregiver-Object
 	 * @return dictionary
 	 */
+	/*
 	public HashMap<Integer,MCaregiver> getCaregivers()
 	{
 		String query = "SELECT * FROM caregivers";
@@ -434,10 +479,15 @@ public class ConnectDB {
 		
 		return caregivers;
 	}
+	 */
 	
-	private void getPrecriptions(MAdmission admission, String patientSubjId) {
+	private void getPrescriptions(MAdmission admission, String patientSubjId) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the PRESCRIPTIONS table is in the HOSP module
+		 */
 		String query =  "SELECT * " +
-						"FROM PRESCRIPTIONS " +
+						"FROM HOSP.PRESCRIPTIONS " +
 						"WHERE SUBJECT_ID = " + patientSubjId + " AND HADM_ID= " + admission.getAdmissionId();
 		PreparedStatement statement;
 		try {
@@ -477,8 +527,12 @@ public class ConnectDB {
 	}
 	
 	private void getTransfers(MAdmission admission, String patientSubjId) {
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the TRANSFERS table is in the CORE module
+		 */
 		String query =  "SELECT * " +
-						"FROM TRANSFERS " +
+						"FROM CORE.TRANSFERS " +
 						"WHERE SUBJECT_ID = " + patientSubjId + " AND HADM_ID= " + admission.getAdmissionId();
 		PreparedStatement statement;
 		try {
@@ -518,7 +572,11 @@ public class ConnectDB {
 	 * @return dictionary
 	 */
 	public HashMap<Integer, MWard> getLocations() {
-		String query = "SELECT DISTINCT curr_wardid, curr_careunit FROM transfers";
+		/**
+		 * Schema name added to table name due to structural changes in MIMIC IV grouping the tables into modules
+		 * In this case the transfers table is in the core module
+		 */
+		String query = "SELECT DISTINCT curr_wardid, curr_careunit FROM core.transfers";
 		HashMap<Integer,MWard> wards = new HashMap<Integer,MWard>();
 		
 		PreparedStatement statement;

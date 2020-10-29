@@ -289,7 +289,7 @@ public class Mimic2Fhir {
 			List<Condition> conditions, List<Procedure> procedures) {
 		
 		//if bundle exceeds 15000 resources -> start new bundle
-		if(bundleC.getNumberOfResorces() > 15000) {
+		if(bundleC.getNumberOfResources() > 15000) {
 			//Push bundle to queue
 			JsonObject message = Json.createObjectBuilder()
 					.add("number", numPat + "_" + bundleC.getInternalBundleNumber()) 

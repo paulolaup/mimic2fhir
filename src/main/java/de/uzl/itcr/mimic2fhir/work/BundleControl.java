@@ -27,7 +27,7 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
  */
 public class BundleControl {
 	private Bundle transactionBundle;
-	private int numberOfResorces= 0;
+	private int numberOfResources = 0;
 	private int internalBundleNumber = 0;
 	
 	/**
@@ -44,8 +44,8 @@ public class BundleControl {
 	 * Number of resources currently present in bundle
 	 * @return number of resources
 	 */
-	public int getNumberOfResorces() {
-		return numberOfResorces;
+	public int getNumberOfResources() {
+		return numberOfResources;
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class BundleControl {
 	public void resetBundle() {
 		transactionBundle = new Bundle();
 		transactionBundle.setType(BundleType.TRANSACTION);
-		numberOfResorces = 0;
+		numberOfResources = 0;
 		internalBundleNumber++;
 	}
 	
@@ -93,7 +93,7 @@ public class BundleControl {
 		      .setUrl(rToAdd.fhirType())
 		      .setMethod(HTTPVerb.POST);
 		
-		numberOfResorces++;
+		numberOfResources++;
 
 	}
 	
@@ -109,7 +109,7 @@ public class BundleControl {
 		      .setUrl(rToAdd.fhirType())
 		      .setMethod(HTTPVerb.POST);
 		
-		numberOfResorces++;
+		numberOfResources++;
 		
 	}
 	
@@ -128,6 +128,6 @@ public class BundleControl {
 		      .setIfNoneExist(condition)
 		      .setMethod(HTTPVerb.POST);
 		
-		numberOfResorces++;
+		numberOfResources++;
 	}
 }
