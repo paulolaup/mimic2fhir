@@ -107,6 +107,9 @@ public class MPatient {
 		}
 		
 		//Gender
+		/**
+		 * Added administrative gender "other" as a possibility
+		 */
 		switch(gender) {
 			case "M":
 				pMimic.setGender(AdministrativeGender.MALE);
@@ -114,6 +117,10 @@ public class MPatient {
 			case "F":
 				pMimic.setGender(AdministrativeGender.FEMALE);
 				break;
+			/*It is not known to me whether or not such a gender is actually used in MIMIC-IV or whether or not it is
+			* actually represented as "O" in the data base*/
+			case "O":
+				pMimic.setGender(AdministrativeGender.OTHER);
 			default:
 				pMimic.setGender(AdministrativeGender.UNKNOWN);
 		}

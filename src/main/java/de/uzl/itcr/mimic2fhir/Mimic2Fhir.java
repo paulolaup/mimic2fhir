@@ -110,10 +110,13 @@ public class Mimic2Fhir {
 	public void start() {	
     	//Connection to mimic postgres DB
     	dbAccess = new ConnectDB(config);
-    	
+
+    	/*
+    	* Disabled due to the getCaregivers method being disabled; further information can be found in the ConnectDB class
     	//Preload Caregivers
     	caregivers = dbAccess.getCaregivers();
-    	
+    	*/
+
     	//Preload Wards
     	locations = dbAccess.getLocations();
     	

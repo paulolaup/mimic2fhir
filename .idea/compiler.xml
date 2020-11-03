@@ -9,8 +9,8 @@
         <module name="mimic2fhir" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="mimic2fhir" target="7" />
+    <bytecodeTargetLevel target="11">
+      <module name="mimic2fhir" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
